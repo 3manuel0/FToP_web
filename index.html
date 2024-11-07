@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>text_to_img</title>
+  </head>
+  <style>
+    #canvas {
+      background-color: white;
+      border: rgb(41, 122, 251) 2px solid;
+    }
+    #text {
+      resize: none;
+      display: none;
+      background-color: white;
+      border: rgb(41, 122, 251) 2px solid;
+    }
+    body {
+      background-color: #121212;
+      display: flex;
+      height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      color: white;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    button {
+      background-color: transparent;
+      color: white;
+    }
+
+    .custom-file-upload,
+    button {
+      border: 1px solid rgb(41, 122, 251);
+      display: inline-block;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-family: "Courier New", Courier, monospace;
+    }
+  </style>
+  <body>
+    <label for="file" class="custom-file-upload"> Upload File/PNG Image</label>
+    <input type="file" name="" id="file" />
+    <textarea name="text" id="text"></textarea>
+    <canvas id="canvas"></canvas>
+    <button id="dwn">Download Output File</button>
+    <img id="img" src="" alt="" />
+  </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+  <script src="UPNG.js"></script>
+  <script src="script.js"></script>
+</html>
