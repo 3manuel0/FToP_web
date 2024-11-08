@@ -1,30 +1,44 @@
-let fileInput = document.getElementById("file");
+const fileInput = document.getElementById("file");
 const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const textArea = document.getElementById("text");
 let pngData;
-let ctx = canvas.getContext("2d");
-let img = document.getElementById("img");
-let img1 = new Image();
-let fileName = "";
+let fileExt = "";
 let width = 800;
 let height = 600;
 canvas.width = width;
 canvas.height = height;
+textArea.style.width = width + "px";
+textArea.style.height = height + "px";
 
 fileInput.addEventListener("change", (event) => {
+  // get file from input
   let file = event.target.files[0];
-  let CfileName = file.name.split(".")[1] + "\0";
-  let fileNameBytes = Uint8Array.from(
-    Array.from(CfileName).map((char) => char.charCodeAt(0))
+
+  // get file extension from file name
+  let CfileExt = file.name.split(".")[1] + "\0";
+
+  // creat and Uint8array from file ext html => [104, 116, 109, 108, 0]
+  let fileExtBytes = Uint8Array.from(
+    Array.from(CfileExt).map((char) => char.charCodeAt(0))
   );
+
+  //if file has no extension return
   if (file.name.split(".").length !== 2) {
     console.log("file doesn't have an extension");
     return;
   }
-  console.log(fileName, fileNameBytes);
+  console.log(fileExt, fileExtBytes);
+
+  // if file not null
   if (file) {
-    fileName = file.name.split(".")[1];
-    if (fileName.replaceAll("\0", "") != "png") {
+    fileExt = file.name.split(".")[1];
+    // extension is .png
+    if (fileExt.replaceAll("\0", "") != "png") {
+      // new file reader
       let reader = new FileReader();
+
+      // reader loaded successfully
       reader.onload = function (e) {
         result = e.target.result;
         let resultBytes = new Uint8ClampedArray(result);
@@ -32,16 +46,16 @@ fileInput.addEventListener("change", (event) => {
         dataSize = new Uint8ClampedArray(dataSize.buffer);
         console.log(dataSize);
         let length = Math.floor(
-          (width * height * 4) / (resultBytes.length + CfileName.length + 4)
+          (width * height * 4) / (resultBytes.length + CfileExt.length + 4)
         );
         let resultBytesWidthExt = new Uint8ClampedArray(
-          resultBytes.length + CfileName.length + 4
+          resultBytes.length + CfileExt.length + 4
         );
-        resultBytesWidthExt.set(fileNameBytes, 0);
-        resultBytesWidthExt.set(dataSize, fileNameBytes.length);
-        resultBytesWidthExt.set(resultBytes, fileNameBytes.length + 4);
+        resultBytesWidthExt.set(fileExtBytes, 0);
+        resultBytesWidthExt.set(dataSize, fileExtBytes.length);
+        resultBytesWidthExt.set(resultBytes, fileExtBytes.length + 4);
         let a = Uint8ClampedArray.from(
-          new Uint8Array(resultBytesWidthExt.buffer, fileNameBytes.length, 4)
+          new Uint8Array(resultBytesWidthExt.buffer, fileExtBytes.length, 4)
         );
         console.log(new Uint32Array(a.buffer), resultBytes.length);
         console.log(a);
@@ -55,9 +69,12 @@ fileInput.addEventListener("change", (event) => {
             resultBytesWidthExt.length + resultBytesWidthExt.length * i
           );
         }
-        console.log(newDtaArr, fileNameBytes);
+
+        console.log(newDtaArr, fileExtBytes);
         console.log(e.target);
         createCanvas(newDtaArr);
+
+        // download file when clicking on download button
         document.getElementById("dwn").onclick = () => {
           // Create a Blob and download link
           const blob = new Blob([pngData], { type: "image/png" });
@@ -72,16 +89,22 @@ fileInput.addEventListener("change", (event) => {
           URL.revokeObjectURL(url);
         };
       };
+
+      // reader when error
       reader.onerror = function (e) {
         console.log("Error : " + e.type);
       };
-      console.log(file);
+
+      // read file
       reader.readAsArrayBuffer(file);
+      //
     } else {
+      // extension is not .png
       let reader = new FileReader();
+
+      // on reader load successfully
       reader.onload = (e) => {
         const result = e.target.result;
-        const bytes = new Uint8ClampedArray(result);
         console.log(result);
         let img = UPNG.decode(result);
         let imageBytes = new Uint8ClampedArray(UPNG.toRGBA8(img)[0]);
@@ -98,20 +121,20 @@ fileInput.addEventListener("change", (event) => {
         console.log(extLen, extensionString);
         if (extensionString == "txt") {
           let text = new TextDecoder().decode(fileDataBuffer);
-          let textArea = document.getElementById("text");
           canvas.style.display = "none";
           textArea.style.display = "block";
-          textArea.style.width = 800 + "px";
-          textArea.style.height = 600 + "px";
           textArea.value = text;
         } else {
+          canvas.style.display = "block";
+          textArea.style.display = "none";
           let imageData = new ImageData(imageBytes, width, height);
           ctx.putImageData(imageData, 0, 0);
         }
+
+        // Download button onclick
         document.getElementById("dwn").onclick = () => {
           var blob = new Blob([new Uint8Array(fileDataBuffer)]);
           const url = URL.createObjectURL(blob);
-
           // Trigger download
           const link = document.createElement("a");
           link.href = url;
@@ -122,11 +145,18 @@ fileInput.addEventListener("change", (event) => {
           URL.revokeObjectURL(url);
         };
       };
+
+      // reader when error
+      reader.onerror = function (e) {
+        console.log("Error : " + e.type);
+      };
+
+      // read file
       reader.readAsArrayBuffer(file);
     }
   }
 });
-// console.log(fileAsData);
+
 const createCanvas = (fileData) => {
   let bytes = new Uint8ClampedArray(width * height * 4);
   console.log(bytes);
@@ -137,27 +167,32 @@ const createCanvas = (fileData) => {
       bytes[i] = 50;
     }
   }
-  pngData = UPNG.encode([bytes.buffer], width, height, 0);
-  // let img = UPNG.decode(pngData);
-  // let imageBytes = new Uint8ClampedArray(UPNG.toRGBA8(img)[0]);
-  let imageData = new ImageData(bytes, width, height);
-  canvas.style.display = "block";
-  // let imageData = new ImageData(pngData, width, height);
-  ctx.putImageData(imageData, 0, 0);
   // Encode as PNG using UPNG
+  pngData = UPNG.encode([bytes.buffer], width, height, 0);
+  let imageData = new ImageData(bytes, width, height);
+  // textArea.style.display = "none";
+  // textArea.value = "";
+  canvas.style.display = "block";
+  ctx.putImageData(imageData, 0, 0);
 };
 
+// get string length from memory
 const str_len = (mem, str_ptr) => {
   let len = 0;
+  // check if we get to "\0" or 0 byte Cstring(char*) style
   while (mem[str_ptr] != 0) {
     len++;
     str_ptr++;
   }
   return len;
 };
+
+// get string from memory
 const get_str = (str_ptr, buffer) => {
   const mem = new Uint8Array(buffer);
   const len = str_len(mem, str_ptr);
+  // extract string bytes from mmemory buffer
   const str_bytes = new Uint8Array(buffer, str_ptr, len);
+  // return string decoded from bytes
   return new TextDecoder().decode(str_bytes);
 };
