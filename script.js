@@ -99,8 +99,6 @@ fileInput.addEventListener("change", (event) => {
         if (extensionString == "txt") {
           let text = new TextDecoder().decode(fileDataBuffer);
           let textArea = document.getElementById("text");
-          // ctx.font = "2rem 'Courier New'";
-          // ctx.fillText(text, 0, 25, width - 16 * 2);
           canvas.style.display = "none";
           textArea.style.display = "block";
           textArea.style.width = 800 + "px";
@@ -143,7 +141,7 @@ const createCanvas = (fileData) => {
   // let img = UPNG.decode(pngData);
   // let imageBytes = new Uint8ClampedArray(UPNG.toRGBA8(img)[0]);
   let imageData = new ImageData(bytes, width, height);
-  console.log(imageData);
+  canvas.style.display = "block";
   // let imageData = new ImageData(pngData, width, height);
   ctx.putImageData(imageData, 0, 0);
   // Encode as PNG using UPNG
