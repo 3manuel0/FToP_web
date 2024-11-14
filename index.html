@@ -15,6 +15,9 @@
       display: none;
       background-color: white;
       border: rgb(41, 122, 251) 2px solid;
+      outline: none;
+      font-size: 1.2rem;
+      font-family: "Comic Sans MS", "Comic Sans";
     }
     body {
       background-color: #121212;
@@ -46,8 +49,8 @@
   <body>
     <label for="file" class="custom-file-upload"> Upload File/PNG Image</label>
     <input type="file" name="" id="file" />
-    <textarea name="text" id="text"></textarea>
-    <canvas id="canvas"></canvas>
+    <textarea name="text" id="text" readonly></textarea>
+    <canvas id="canvas" width="800" height="600"></canvas>
     <button id="dwn">Download Output File</button>
     <img id="img" src="" alt="" />
   </body>

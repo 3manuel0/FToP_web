@@ -70,8 +70,8 @@ fileInput.addEventListener("change", (event) => {
           );
         }
 
-        console.log(newDtaArr, fileExtBytes);
-        console.log(e.target);
+        // console.log(newDtaArr, fileExtBytes);
+        // console.log(e.target);
         createCanvas(newDtaArr);
 
         // download file when clicking on download button
@@ -125,6 +125,7 @@ fileInput.addEventListener("change", (event) => {
           textArea.style.display = "block";
           textArea.value = text;
         } else {
+          // TODO draw everything related to the canvas with createCanvas function
           canvas.style.display = "block";
           textArea.style.display = "none";
           let imageData = new ImageData(imageBytes, width, height);
