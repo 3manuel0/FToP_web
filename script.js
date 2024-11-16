@@ -168,7 +168,7 @@ const createCanvas = (fileData) => {
       bytes[i] = 50;
     }
   }
-  // Encode as PNG using UPNG
+  // encode as PNG with UPNG
   pngData = UPNG.encode([bytes.buffer], width, height, 0);
   let imageData = new ImageData(bytes, width, height);
   // textArea.style.display = "none";
@@ -180,7 +180,7 @@ const createCanvas = (fileData) => {
 // get string length from memory
 const str_len = (mem, str_ptr) => {
   let len = 0;
-  // check if we get to "\0" or 0 byte Cstring(char*) style
+  // check if we get to "\0" or 0 byte (Cstring(char*) like style)
   while (mem[str_ptr] != 0) {
     len++;
     str_ptr++;
