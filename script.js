@@ -25,7 +25,7 @@ fileInput.addEventListener("change", (event) => {
 
   //if file has no extension return
   if (file.name.split(".").length !== 2) {
-    console.log("file doesn't have an extension");
+    console.log("file doesn't might have multiple extensions or . in the name");
     return;
   }
   console.log(fileExt, fileExtBytes);
@@ -33,15 +33,29 @@ fileInput.addEventListener("change", (event) => {
   // if file not null
   if (file) {
     fileExt = file.name.split(".")[1];
+
     // extension is .png
     if (fileExt.replaceAll("\0", "") != "png") {
       // new file reader
       let reader = new FileReader();
 
       // reader loaded successfully
-      reader.onload = function (e) {
+      reader.onload = (e) => {
         result = e.target.result;
         let resultBytes = new Uint8ClampedArray(result);
+
+        /* check if file is bigger than ~ 1.9mb -> 800*600*4
+         minus 40bytes for extension and length */
+        if (resultBytes.byteLength + 40 > width * height * 4) {
+          showText("file is too big you need 1.8mb file", "red");
+          console.log(
+            "file is too big for supported format",
+            resultBytes,
+            width * height * 4
+          );
+          return;
+        }
+
         let dataSize = new Uint32Array([resultBytes.length]);
         dataSize = new Uint8ClampedArray(dataSize.buffer);
         console.log(dataSize);
@@ -91,23 +105,42 @@ fileInput.addEventListener("change", (event) => {
       };
 
       // reader when error
-      reader.onerror = function (e) {
+      reader.onerror = (e) => {
         console.log("Error : " + e.type);
       };
 
       // read file
       reader.readAsArrayBuffer(file);
-      //
+      // extension is .png
     } else {
-      // extension is not .png
+      // .png
       let reader = new FileReader();
 
       // on reader load successfully
       reader.onload = (e) => {
         const result = e.target.result;
-        console.log(result);
         let img = UPNG.decode(result);
         let imageBytes = new Uint8ClampedArray(UPNG.toRGBA8(img)[0]);
+
+        if (imageBytes.byteLength > width * height * 4) {
+          showText("file is too big for suported format", "red");
+          console.log(
+            "file is too big for suported format",
+            imageBytes,
+            width * height * 4
+          );
+          return;
+        }
+
+        if (str_len(imageBytes, 0) == 0) {
+          showText(
+            "you're not using a png that is created using this site",
+            "red"
+          );
+          console.log("you're not using a png that is created using this site");
+          return;
+        }
+
         let extLen = str_len(imageBytes, 0) + 1;
         let dataBufferSize = Uint8ClampedArray.from(
           new Uint8ClampedArray(imageBytes.buffer, extLen, 4)
@@ -121,9 +154,7 @@ fileInput.addEventListener("change", (event) => {
         console.log(extLen, extensionString);
         if (extensionString == "txt") {
           let text = new TextDecoder().decode(fileDataBuffer);
-          canvas.style.display = "none";
-          textArea.style.display = "block";
-          textArea.value = text;
+          showText(text);
         } else {
           // TODO draw everything related to the canvas with createCanvas function
           canvas.style.display = "block";
@@ -148,7 +179,7 @@ fileInput.addEventListener("change", (event) => {
       };
 
       // reader when error
-      reader.onerror = function (e) {
+      reader.onerror = (e) => {
         console.log("Error : " + e.type);
       };
 
@@ -157,6 +188,14 @@ fileInput.addEventListener("change", (event) => {
     }
   }
 });
+
+const showText = (text, color) => {
+  color = color == undefined ? "#000" : color;
+  canvas.style.display = "none";
+  textArea.style.display = "block";
+  textArea.style.color = color;
+  textArea.value = text;
+};
 
 const createCanvas = (fileData) => {
   let bytes = new Uint8ClampedArray(width * height * 4);
@@ -182,6 +221,8 @@ const str_len = (mem, str_ptr) => {
   let len = 0;
   // check if we get to "\0" or 0 byte (Cstring(char*) like style)
   while (mem[str_ptr] != 0) {
+    // if we didn't find a 0 byte in all the bytes we return 0;
+    if (len >= mem.byteLength) return 0;
     len++;
     str_ptr++;
   }
