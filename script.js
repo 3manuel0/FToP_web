@@ -2,15 +2,19 @@ const fileInput = document.getElementById("file");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const textArea = document.getElementById("text");
+const showCanvasBtn = document.getElementById("show-canvas");
+const showDetailsBtn = document.getElementById("show-details");
+const width = 800;
+const height = 600;
 let pngData;
 let fileExt = "";
-let width = 800;
-let height = 600;
 canvas.width = width;
 canvas.height = height;
 textArea.style.width = width + "px";
 textArea.style.height = height + "px";
+textArea.contentEditable = false;
 
+// if file is uploaded
 fileInput.addEventListener("change", (event) => {
   // get file from input
   let file = event.target.files[0];
@@ -55,24 +59,33 @@ fileInput.addEventListener("change", (event) => {
           );
           return;
         }
-
+        // create a new uint32 that stores file byte's length
         let dataSize = new Uint32Array([resultBytes.length]);
+        // turning them to uint8clamped array
         dataSize = new Uint8ClampedArray(dataSize.buffer);
         console.log(dataSize);
+        // calculate the times to duplicate data to fill image
         let length = Math.floor(
           (width * height * 4) / (resultBytes.length + CfileExt.length + 4)
         );
+        /* create a uint clamped array to store file bytes + extension 
+        + 4 bytes for the data size*/
         let resultBytesWidthExt = new Uint8ClampedArray(
           resultBytes.length + CfileExt.length + 4
         );
+        // fill the resultBytesWidthExt with the data
         resultBytesWidthExt.set(fileExtBytes, 0);
         resultBytesWidthExt.set(dataSize, fileExtBytes.length);
         resultBytesWidthExt.set(resultBytes, fileExtBytes.length + 4);
+        // TODO remove this :
         let a = Uint8ClampedArray.from(
           new Uint8Array(resultBytesWidthExt.buffer, fileExtBytes.length, 4)
         );
         console.log(new Uint32Array(a.buffer), resultBytes.length);
         console.log(a);
+        // code above for debuging getting data size from bytes
+
+        // duplicating data to fill most or all of the image
         let newDtaArr = new Uint8ClampedArray(
           resultBytesWidthExt.length * length
         );
@@ -86,6 +99,8 @@ fileInput.addEventListener("change", (event) => {
 
         // console.log(newDtaArr, fileExtBytes);
         // console.log(e.target);
+
+        // create canvas from data to show how image looks like
         createCanvas(newDtaArr);
 
         // download file when clicking on download button
@@ -123,9 +138,9 @@ fileInput.addEventListener("change", (event) => {
         let imageBytes = new Uint8ClampedArray(UPNG.toRGBA8(img)[0]);
 
         if (imageBytes.byteLength > width * height * 4) {
-          showText("file is too big for suported format", "red");
+          showText("file/image is too big for suported format", "red");
           console.log(
-            "file is too big for suported format",
+            "file/image is too big for suported format",
             imageBytes,
             width * height * 4
           );
@@ -151,17 +166,26 @@ fileInput.addEventListener("change", (event) => {
           extLen + 4,
           new Uint32Array(dataBufferSize.buffer)[0]
         );
+        console.log(fileDataBuffer);
         console.log(extLen, extensionString);
-        if (extensionString == "txt") {
-          let text = new TextDecoder().decode(fileDataBuffer);
-          showText(text);
-        } else {
-          // TODO draw everything related to the canvas with createCanvas function
-          canvas.style.display = "block";
-          textArea.style.display = "none";
-          let imageData = new ImageData(imageBytes, width, height);
-          ctx.putImageData(imageData, 0, 0);
-        }
+        // if (extensionString == "txt") {
+        let text = new TextDecoder().decode(fileDataBuffer);
+        let extTxt = `<p><b>File extension: </b>.${extensionString}</p>`;
+        let byteSizeTxt = `<p><b>File byte size: </b>${fileDataBuffer.byteLength}bytes</p>`;
+        let content =
+          extensionString == "txt"
+            ? `</br><span style="background-color: lightblue;padding: 0.1rem;">${text}</span>`
+            : "<span> raw file binary data</span>";
+        let outputText =
+          extTxt + byteSizeTxt + `<p><b>File content:</b>${content}</p>`;
+        showText(outputText);
+        // } else {
+        // TODO draw everything related to the canvas with createCanvas function
+        // canvas.style.display = "block";
+        // textArea.style.display = "none";
+        let imageData = new ImageData(imageBytes, width, height);
+        ctx.putImageData(imageData, 0, 0);
+        // }
 
         // Download button onclick
         document.getElementById("dwn").onclick = () => {
@@ -194,7 +218,7 @@ const showText = (text, color) => {
   canvas.style.display = "none";
   textArea.style.display = "block";
   textArea.style.color = color;
-  textArea.value = text;
+  textArea.innerHTML = text;
 };
 
 const createCanvas = (fileData) => {
@@ -202,8 +226,10 @@ const createCanvas = (fileData) => {
   console.log(bytes);
   for (let i = 0; i < bytes.length; i++) {
     if (i < fileData.length) {
+      // fill empty raw image bytes with file data(it could be duplicated a lot of times)
       bytes[i] = fileData[i];
     } else {
+      // filling the rest of the empty bytes with a gary color
       bytes[i] = 50;
     }
   }
@@ -238,3 +264,14 @@ const get_str = (str_ptr, buffer) => {
   // return string decoded from bytes
   return new TextDecoder().decode(str_bytes);
 };
+
+const showCanvas = () => {
+  canvas.style.display = "block";
+  textArea.style.display = "none";
+};
+const showDetails = () => {
+  canvas.style.display = "none";
+  textArea.style.display = "block";
+};
+showCanvasBtn.onclick = () => showCanvas();
+showDetailsBtn.onclick = () => showDetails();
