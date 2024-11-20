@@ -96,12 +96,24 @@ fileInput.addEventListener("change", (event) => {
             resultBytesWidthExt.length + resultBytesWidthExt.length * i
           );
         }
-
+        let extTxt = `<p><b>File extension: </b>.${CfileExt}</p>`;
+        let byteSizeTxt = `<p><b>File byte size: </b>${resultBytes.length}bytes</p>`;
+        // let content =
+        //   extensionString == "txt"
+        //     ? `</br><span style="background-color: lightblue;padding: 0.1rem;">${null}</span>`
+        //     : "<span> raw file binary data</span>";
+        let outputText =
+          extTxt +
+          byteSizeTxt +
+          `<p style="background-color:green"><b>The png file was generated successfully</b></p>` +
+          `<p>👈 click left on show image to see the image</p>` +
+          `<p>👇 click below on Download to download the image</p>`;
+        createCanvas(newDtaArr);
+        showText(outputText);
         // console.log(newDtaArr, fileExtBytes);
         // console.log(e.target);
 
         // create canvas from data to show how image looks like
-        createCanvas(newDtaArr);
 
         // download file when clicking on download button
         document.getElementById("dwn").onclick = () => {
@@ -174,17 +186,27 @@ fileInput.addEventListener("change", (event) => {
         let byteSizeTxt = `<p><b>File byte size: </b>${fileDataBuffer.byteLength}bytes</p>`;
         let content =
           extensionString == "txt"
-            ? `</br><span style="background-color: lightblue;padding: 0.1rem;">${text}</span>`
+            ? `<p class="content" style="padding: 0.4rem;">${text}</p>`
             : "<span> raw file binary data</span>";
         let outputText =
-          extTxt + byteSizeTxt + `<p><b>File content:</b>${content}</p>`;
+          extTxt +
+          byteSizeTxt +
+          `<p><b>File content:</b></p>` +
+          `<div id="content" style="max-height: 450px;border: 2px solid black;background: lightblue;width: fit-content;">${content}</div>` +
+          `<p>👇 click below on Download to download the Extracted File.</p>`;
+        createCanvas(imageBytes);
         showText(outputText);
+        console.log(document.querySelector(".content")?.offsetHeight);
+        document.querySelector(".content")?.offsetHeight > 450
+          ? (document.getElementById("content").style.overflowY = "scroll")
+          : null;
         // } else {
         // TODO draw everything related to the canvas with createCanvas function
         // canvas.style.display = "block";
         // textArea.style.display = "none";
-        let imageData = new ImageData(imageBytes, width, height);
-        ctx.putImageData(imageData, 0, 0);
+        // let imageData = new ImageData(imageBytes, width, height);
+        // ctx.putImageData(imageData, 0, 0);
+
         // }
 
         // Download button onclick
@@ -214,6 +236,7 @@ fileInput.addEventListener("change", (event) => {
 });
 
 const showText = (text, color) => {
+  textArea.innerHTML = "";
   color = color == undefined ? "#000" : color;
   canvas.style.display = "none";
   textArea.style.display = "block";
@@ -238,7 +261,8 @@ const createCanvas = (fileData) => {
   let imageData = new ImageData(bytes, width, height);
   // textArea.style.display = "none";
   // textArea.value = "";
-  canvas.style.display = "block";
+  // canvas.style.display = "block";
+  showCanvas();
   ctx.putImageData(imageData, 0, 0);
 };
 
