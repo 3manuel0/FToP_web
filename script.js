@@ -4,6 +4,7 @@ const ctx = canvas.getContext("2d");
 const textArea = document.getElementById("text");
 const showCanvasBtn = document.getElementById("show-canvas");
 const showDetailsBtn = document.getElementById("show-details");
+const printableExtensions = ["c", "html", "txt", "java", "json"];
 const width = 800;
 const height = 600;
 let pngData;
@@ -183,16 +184,25 @@ fileInput.addEventListener("change", (event) => {
         // if (extensionString == "txt") {
         let text = new TextDecoder().decode(fileDataBuffer);
         let extTxt = `<p><b>File extension: </b>.${extensionString}</p>`;
-        let byteSizeTxt = `<p><b>File byte size: </b>${fileDataBuffer.byteLength}bytes</p>`;
-        let content =
-          extensionString == "txt"
-            ? `<p class="content" style="padding: 0.4rem;">${text}</p>`
-            : "<span> raw file binary data</span>";
+        let byteSizeTxt = `<p><b>File byte size: </b>${
+          fileDataBuffer.byteLength > 1024 * 1024
+            ? (fileDataBuffer.byteLength / (1024 * 1024)).toFixed(2) +
+              "Megabytes"
+            : fileDataBuffer.byteLength > 1024
+            ? (fileDataBuffer.byteLength / 1024).toFixed(2) + "Kilobytes"
+            : fileDataBuffer.byteLength + "bytes"
+        }</p>`;
+        let content = printableExtensions.includes(extensionString)
+          ? `<p class="content" style="padding: 0.4rem; white-space:pre;">${text
+              .replaceAll(/</g, "&lt;")
+              .replaceAll(/>/g, "&gt;")
+              .replaceAll("\n", "<br>")}</p>`
+          : "<span> raw file binary data</span>";
         let outputText =
           extTxt +
           byteSizeTxt +
           `<p><b>File content:</b></p>` +
-          `<div id="content" style="max-height: 450px;border: 2px solid black;background: lightblue;width: fit-content;">${content}</div>` +
+          `<div id="content" style="max-height: 450px;border: 2px solid black;background: lightblue;width: fit-content;overflow-y: scroll;max-width: 800px;">${content}</div>` +
           `<p>👇 click below on Download to download the Extracted File.</p>`;
         createCanvas(imageBytes);
         showText(outputText);
@@ -200,14 +210,9 @@ fileInput.addEventListener("change", (event) => {
         document.querySelector(".content")?.offsetHeight > 450
           ? (document.getElementById("content").style.overflowY = "scroll")
           : null;
-        // } else {
-        // TODO draw everything related to the canvas with createCanvas function
-        // canvas.style.display = "block";
-        // textArea.style.display = "none";
-        // let imageData = new ImageData(imageBytes, width, height);
-        // ctx.putImageData(imageData, 0, 0);
-
-        // }
+        document.querySelector(".content")?.offsetWidth > 780
+          ? (document.querySelector(".content").style.whiteSpace = "normal")
+          : null;
 
         // Download button onclick
         document.getElementById("dwn").onclick = () => {
@@ -289,13 +294,18 @@ const get_str = (str_ptr, buffer) => {
   return new TextDecoder().decode(str_bytes);
 };
 
+// show canvas
 const showCanvas = () => {
   canvas.style.display = "block";
   textArea.style.display = "none";
 };
+
+// show textArea div
 const showDetails = () => {
   canvas.style.display = "none";
   textArea.style.display = "block";
 };
+
+// bind buttons to functions
 showCanvasBtn.onclick = () => showCanvas();
 showDetailsBtn.onclick = () => showDetails();
