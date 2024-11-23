@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const textArea = document.getElementById("text");
 const showCanvasBtn = document.getElementById("show-canvas");
 const showDetailsBtn = document.getElementById("show-details");
-const printableExtensions = ["c", "html", "txt", "java", "json"];
+const printableExtensions = ["c", "html", "txt", "java", "json", "svg"];
 const width = 800;
 const height = 600;
 let pngData;
@@ -192,12 +192,17 @@ fileInput.addEventListener("change", (event) => {
             ? (fileDataBuffer.byteLength / 1024).toFixed(2) + "Kilobytes"
             : fileDataBuffer.byteLength + "bytes"
         }</p>`;
-        let content = printableExtensions.includes(extensionString)
-          ? `<p class="content" style="padding: 0.4rem; white-space:pre;">${text
-              .replaceAll(/</g, "&lt;")
-              .replaceAll(/>/g, "&gt;")
-              .replaceAll("\n", "<br>")}</p>`
-          : "<span> raw file binary data</span>";
+        let content = "";
+        if (extensionString == "svg") {
+          content = `<p class="content" style="padding: 0.4rem; white-space:pre; position:relative;min-width: 300px;min-height: 150px;">${text}</p>`;
+        } else if (printableExtensions.includes(extensionString)) {
+          content = `<p class="content" style="padding: 0.4rem; white-space:pre;">${text
+            .replaceAll(/</g, "&lt;")
+            .replaceAll(/>/g, "&gt;")
+            .replaceAll("\n", "<br>")}</p>`;
+        } else {
+          content = "<span> raw file binary data</span>";
+        }
         let outputText =
           extTxt +
           byteSizeTxt +
