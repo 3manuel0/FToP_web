@@ -269,9 +269,6 @@ const createCanvas = (fileData) => {
   // encode as PNG with UPNG
   pngData = UPNG.encode([bytes.buffer], width, height, 0);
   let imageData = new ImageData(bytes, width, height);
-  // textArea.style.display = "none";
-  // textArea.value = "";
-  // canvas.style.display = "block";
   showCanvas();
   ctx.putImageData(imageData, 0, 0);
 };
@@ -314,3 +311,5 @@ const showDetails = () => {
 // bind buttons to functions
 showCanvasBtn.onclick = () => showCanvas();
 showDetailsBtn.onclick = () => showDetails();
+
+showDetails();
